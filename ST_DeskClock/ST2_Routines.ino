@@ -606,7 +606,7 @@ void DisplaySerialData()
     delay(250);
 
     GETFROMEEPROM();
-    if(IncomingMessIndex == 0 | IncomingMessIndex > 27)
+    if(IncomingMessIndex == 0 || IncomingMessIndex > 27)
     {
       MessagePointer = 0;
       SUBSTATE =3;
@@ -1432,7 +1432,7 @@ void writeTime(uint8_t dig1, uint8_t dig2, uint8_t dig3, uint8_t dig4)
    bitSet(AMPMALARMDOTS,6);
   }
   
-   if(PM_NotAM_flag && (STATE == 1 | STATE == 2) && TH_Not24_flag)     // AM / PM dot (bottom left) (Display or Set Time)
+   if(PM_NotAM_flag && (STATE == 1 || STATE == 2) && TH_Not24_flag)     // AM / PM dot (bottom left) (Display or Set Time)
   {
 //    bitSet(LEDMAT[0],0);
    bitSet(AMPMALARMDOTS,0);

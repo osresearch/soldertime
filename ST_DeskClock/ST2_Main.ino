@@ -181,7 +181,7 @@ void loop()
     delay(250);
 
 //    bval = !digitalRead(SETBUTTON);
-    if(NextSUBStateRequest | NextStateRequest)
+    if(NextSUBStateRequest || NextStateRequest)
     {
       STATE = 0;
       SUBSTATE = 0;
