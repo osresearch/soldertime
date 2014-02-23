@@ -163,7 +163,7 @@ void LEDupdateTHREE()                                                  // ONE RO
 
     ROWBITINDEX = ROWBITINDEX +1;
     
-    delayMicroseconds(50);                                            // Test to see if this makes LEDs brighter
+    //delayMicroseconds(50);                                            // Test to see if this makes LEDs brighter
   }
 }
 

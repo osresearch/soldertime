@@ -64,7 +64,7 @@ void setup()
   // attachInterrupt(1, MinuteDOWN, FALLING);
 
   // Turn one Interupts, used to update the displayed LED matrix
-  Timer1.initialize(100);                                          // was 100
+  Timer1.initialize(50);                                          // was 100
   //   Timer1.attachInterrupt(LEDupdate);
   Timer1.attachInterrupt(LEDupdateTHREE); 
 
@@ -99,7 +99,7 @@ void setup()
   lamptest();
   }
   
-  displayString("v1.0");
+  displayString("v1.1");
   delay(1500);
   clearmatrix();
   
