@@ -11,7 +11,7 @@ void loop()
   if(((currentMillis - SleepTimer) > SleepLimit) && SleepEnable)
   {
     
-   if(STATE= 1)                                                    // New for ST Desk Clock - goto Time vs Sleep
+   if(STATE== 1)                                                    // New for ST Desk Clock - goto Time vs Sleep
   {
     SUBSTATE = 1;
      blinkON = true;
