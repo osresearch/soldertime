@@ -685,7 +685,7 @@ shortloop:
     else
 
     {
-      Timer1.attachInterrupt(LEDupdateTWO);
+      //Timer1.attachInterrupt(LEDupdateTWO);
 
       while(bval)
       {
