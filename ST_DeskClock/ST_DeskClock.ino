@@ -1,29 +1,28 @@
-
-
-//  *****************************************************************************************************************
-//  *                                                                                                               *
-//  *                                         SpikenzieLabs.com                                                     *
-//  *                                                                                                               *
-//  *                                       Solder:Time Desk Clock                                                  *
-//  *                                                                                                               *
-//  *****************************************************************************************************************
-//
-// BY: MARK DEMERS 
-// May 2013
-// VERSION 1.0
-//
-// Brief:
-// Sketch used in the Solder: Time Desk Clock Kit, more info and build instructions at http://www.spikenzielabs.com/stdc
-// 
-//
-// LEGAL:
-// This code is provided as is. No guaranties or warranties are given in any form. It is your responsibilty to 
-// determine this codes suitability for your application.
-// 
-// Changes:
-// A. Modified LEDupdateTHREE() void used by ST:2 Watch to function with the new circuits in the Solder:Time Desk Clock
-// B. Modified port dirctions on some pins to deal with new circuits.
-// C. Changed sleep mode into a "change back to display time" mode
+/** \file
+ * Solder:Time Desk Clock
+ * SpikenzieLabs.com
+ *
+ * By: MARK DEMERS, May 2013
+ * Updated: Trammell Hudson <hudson@trmm.net>, Feb 2014
+ * VERSION 1.1
+ *
+ * Brief:
+ * Sketch used in the Solder: Time Desk Clock Kit, more info and build
+ * instructions at http://www.spikenzielabs.com/stdc
+ *
+ * Updated information at http://trmm.net/SolderTime_Desk_Clock
+ *
+ *  LEGAL:
+ * This code is provided as is. No guaranties or warranties are given
+ * in any form. It is your responsibilty to determine this codes
+ * suitability for your application.
+ * 
+ * Changes:
+ * A. Modified LEDupdateTHREE() void used by ST:2 Watch to function
+ * with the new circuits in the Solder:Time Desk Clock
+ * B. Modified port dirctions on some pins to deal with new circuits.
+ * C. Changed sleep mode into a "change back to display time" mode
+ */ 
 
 #include <Wire.h>
 #include <EEPROM.h>
@@ -198,10 +197,12 @@ const int digitoffset = 95;                // 95             // was 16
 #define         RTC_ALARM1DATE  B00001010               //; Date
 
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// Bit Map Letter - data array
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// const byte LETTERS[95][5] = {
+/*
+ * Bit Map Letter - data array
+ *
+ * Font is encoded as 5 vertical stripes, 7 bits per stripe.
+ * Array is in ASCII order, with an offset of 0x20 (' ').
+ */
 const byte LETTERS[106][5] = {
   0,0,0,0,0,            // Space
   0,0,95,0,0,           // !
@@ -317,9 +318,6 @@ const byte LETTERS[106][5] = {
   0,62,42,62,0,            // 8
   0,14,10,62,0,            // 9
   0,0,20,0,0,              // :
-
-
-
 };
 
 const byte GRAPHIC[5][5] = {
@@ -329,28 +327,3 @@ const byte GRAPHIC[5][5] = {
   16,32,16,8,4,            // Check mark
   34,20,8,20,34,           // "X"
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
