@@ -48,14 +48,18 @@ led_column_select(
 }
 
 
-/** Clear all seven outputs values from the current matrix.
- * PORTB8 is used for an additional pin, so we don't touch it.
+/** Write an output to the currently selected column/decoder.
+ * There are seven rows per column, mapped to bits PORTB0-6.
+ * PORTB7 is used for an additional pin, so we don't touch it.
  */
 static void
-led_clear(void)
+led_output(
+	uint8_t bits
+)
 {
-	PORTB &= B10000000;
+	PORTB = (PORTB & 0x80) | (bits & 0x7F);
 }
+
 
 
 
@@ -81,14 +85,13 @@ led_clear(void)
 void
 LEDupdateTHREE()
 {  
-	if (ROWBITINDEX < 7)
+	static uint8_t row_mask = 0;
+	static uint8_t column = 0;
+
+	if (row_mask != 0)
 	{
-		led_clear();
-
-		if (bitRead(LEDMAT[Mcolumn], ROWBITINDEX))
-			bitSet(PORTB, ROWBITINDEX);
-
-		ROWBITINDEX++;
+		led_output(LEDMAT[column] & row_mask);
+		row_mask >>= 1;
     
 		// Test to see if this makes LEDs brighter
 		//delayMicroseconds(50);
@@ -96,18 +99,17 @@ LEDupdateTHREE()
 	}
 
 	// We've displayed the entire row; prep for next column
-	ROWBITINDEX = 0;
-	if (++Mcolumn > 19)
-	      Mcolumn = 0;
+	row_mask = 1 << 7;
+	if (++column > 19)
+		column = 0;
 
-	// Clear current outputs and disable the decoders while we switch
-	led_clear();
-	led_decoder_select(0);
 
 	// Each matrix has eight columns (from 0 to 7)
-	const unsigned decoder = (Mcolumn / 8) + 1;
-	const unsigned column = Mcolumn % 8;
+	const unsigned decoder_id = (column / 8) + 1;
+	const unsigned decoder_column = column % 8;
 	
-	led_column_select(column);
-	led_decoder_select(decoder);
+	// Clear current outputs and disable the decoders while we switch
+	led_output(0);
+	led_decoder_select(decoder_id);
+	led_column_select(decoder_column);
 }
