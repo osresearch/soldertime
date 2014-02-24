@@ -1,124 +1,147 @@
-//*******************************************************************************************************************
-// 								                                         Main Loop 
-//*******************************************************************************************************************
+/** \file
+ * Main loop for Solder:Time Desk Clock.
+ *
+ * Run continuously after bootup.
+ */
+
+// Test for Sleep
+static void
+check_sleep_timer(void)
+{
+	currentMillis = millis();
+	OptionModeFlag = false;
+
+	if(SleepEnable && (currentMillis - SleepTimer) > SleepLimit)
+	{
+		// New for ST Desk Clock - goto Time vs Sleep
+		if (STATE== 1)
+		{
+			SUBSTATE = 1;
+			blinkON = true;
+			blinkFlag = false;
+			blinkMin = false;
+			blinkHour = false;
+		} else {
+			STATE= 1; // was STATE= 99; 
+			SUBSTATE = 0;
+		}
+
+		SleepTimer = millis();
+	}
+}
+
+
+// Test for Mode Button Press
+static void
+check_mode_button(void)
+{
+	if (digitalRead(MODEBUTTON))
+		return;
+
+	if(ALARMON)
+		CheckAlarm();
+
+	if(ALARM1FLAG)
+	{
+		ALARM1FLAG = false;
+		ALARMON = false;
+		EnableAlarm1(false);
+		STATE = 90;
+		JustWokeUpFlag = false;
+	} else
+	if(JustWokeUpFlag)
+	{
+		// Used to supress "Time" text from showing when waking up.
+		JustWokeUpFlag = false;
+		JustWokeUpFlag2 = true;
+	} else {
+		NextStateRequest = true;
+	}
+
+	while(1)
+	{
+		// check for simultaneous mode and set buttons
+		if (!digitalRead(SETBUTTON))
+		{
+			OptionModeFlag = true;
+			NextStateRequest = false;
+			NextSUBStateRequest = false;
+			displayString("SPEC");
+			delay(300);
+		}      
+
+		// wait for them to stop holding the button
+		if (!digitalRead(MODEBUTTON))
+			break;
+	}
+
+	delay(100);
+	SleepTimer = millis();
+}
+
+
+// Test for SET Button Press
+static void
+check_set_button(void)
+{
+	if (digitalRead(SETBUTTON))
+		return;
+
+	// if the mode button is held down as well, do nothing
+	if (OptionModeFlag)
+		return;
+
+	NextSUBStateRequest = true;
+
+	while(1)
+	{
+		// this is repeated from above; can be merged?
+		if (!digitalRead(MODEBUTTON))
+		{
+			OptionModeFlag = true;
+			NextStateRequest = false;
+			NextSUBStateRequest = false;
+			displayString("SPEC");
+			delay(300);
+		}   
+      
+		// wait for them to stop holding the button
+		if (digitalRead(SETBUTTON))
+			break;
+	}
+
+	delay(100);
+	SleepTimer = millis();
+}
+ 
+
+// Running Blink counter
+static void
+check_blink(void)
+{
+	if(!blinkFlag)
+	{
+		// Not blinking, just leave the LEDs lit
+		blinkON = true;
+		return;
+	}
+
+	blinkCounter++;
+	if (blinkCounter >blinkTime) // was 150
+	{
+		blinkON = !blinkON;
+		blinkCounter = 0;
+	}
+}  
+
+
 void loop()
 {
-  // Test for Sleep ------------------------------------------------*
+	check_sleep_timer();
+	check_mode_button();
+	check_set_button();
+	check_blink();
 
-  currentMillis = millis();
-  OptionModeFlag = false;
-
-  if(((currentMillis - SleepTimer) > SleepLimit) && SleepEnable)
-  {
-    
-   if(STATE== 1)                                                    // New for ST Desk Clock - goto Time vs Sleep
-  {
-    SUBSTATE = 1;
-     blinkON = true;
-    blinkFlag = false;
-    blinkMin = false;
-    blinkHour = false;
-  }else
-  {
-       STATE= 1; // was STATE= 99; 
-       SUBSTATE = 0;
-  }
-    
-    SleepTimer = millis();
-
-  }
-
-  // Test for Mode Button Press ------------------------------------* 
-
-  bval = !digitalRead(MODEBUTTON);
-  if(bval)
-  {
-    if(ALARMON)
-    {
-    CheckAlarm();
-    }
-
-    if(ALARM1FLAG)
-    {
-      ALARM1FLAG = false;
-      ALARMON = false;
-      EnableAlarm1(false);
-      STATE = 90;
-      JustWokeUpFlag = false;
-    }
-    else
-    {
-      if(JustWokeUpFlag)
-      {
-        JustWokeUpFlag = false;
-        JustWokeUpFlag2 = true;                                    // Used to supress "Time" text from showing when waking up.
-      }
-      else
-      {
-      NextStateRequest = true;
-      }
-   //   SUBSTATE = 99;
-
-      while(bval)
-      {
-          bval = !digitalRead(SETBUTTON);
-          if(bval)
-           {
-            OptionModeFlag = true;
-            NextStateRequest = false;
-            NextSUBStateRequest = false;
-            displayString("SPEC");
-            delay(300);
-           }      
-        bval = !digitalRead(MODEBUTTON);
-      }
-
-      delay(100);
-      SleepTimer = millis();
-    }
-  }
-
-  // Test for SET Button Press ------------------------------------*
-  
-  bval = !digitalRead(SETBUTTON);
-  if(bval && !OptionModeFlag)
-  {
-    NextSUBStateRequest = true;
-
-    while(bval)
-    {
-      
-          bval = !digitalRead(MODEBUTTON);
-          if(bval)
-           {
-            OptionModeFlag = true;
-            NextStateRequest = false;
-            NextSUBStateRequest = false;
-            displayString("SPEC");
-            delay(300);
-           }   
-      
-      
-      bval = !digitalRead(SETBUTTON);
-    }
-    delay(100);
-    SleepTimer = millis();
-  }
- 
-   // Running Blink counter ------------------------------------* 
-  if(blinkFlag)
-  {
-    blinkCounter = blinkCounter +1;
-    if(blinkCounter >blinkTime)                                        // was 150
-    {
-      blinkON = !blinkON;
-      blinkCounter = 0;
-    }
-  }
-  else
-  {
-    blinkON = true;                                                    // Not blinking, just leave the LEDs lit
-  }  
   
 //*******************************************************************************************************************
 // 								                        Main Loop - State Machine 
@@ -208,15 +231,3 @@ void loop()
 
   }
 }
-
-
-//*******************************************************************************************************************
-// 								                                 End of Main Loop
-//*******************************************************************************************************************
-
-
-
-
-
-
-
