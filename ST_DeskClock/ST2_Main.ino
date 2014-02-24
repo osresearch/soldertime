@@ -142,92 +142,76 @@ void loop()
 	check_set_button();
 	check_blink();
 
-  
-//*******************************************************************************************************************
-// 								                        Main Loop - State Machine 
-//*******************************************************************************************************************
+	// these should be moved into function pointers.
+	switch (STATE) 
+	{
+	case 0: // Set-Up
+		STATE = 1;
+		break;
 
-  switch (STATE) 
-  {
-  case 0:                                                                  // Set-Up
-    STATE = 1;
-    break;
+	case 1: // Display Time
+		DisplayTimeSub(); 
+		break;
 
-  case 1:                                                                  // Display Time
-    DisplayTimeSub(); 
-    break;
+	case 2: // Set Time
+		setTimeSub();
+		break; 
 
-  case 2:                                                                  // Set Time
-    setTimeSub();
-    break; 
-
-  case 3:                                                                  // Config Alarm
-   setAlarmSub();
-    break;
+	case 3: // Config Alarm
+		setAlarmSub();
+		break;
  
-   case 4:                                                                 // Stop Watch
-    StopWatch();
-    break;
+	case 4: // Stop Watch
+		StopWatch();
+		break;
  
-    
-  case 5:                                                                 // Serial Display                                 
-  DisplaySerialData();
-  break;
+	case 5: // Serial Display                                 
+		DisplaySerialData();
+		break;
 
-  case 6:                                                                 // Graphic Demo                                 
-  graphican();
-  break;
+	case 6: // Graphic Demo                                 
+		graphican();
+		break;
 
-   // ---------------------------------------------------------------   
-  
-  case 90:                                                                  // Alarm Triggered
-  
-    blinkFlag = true;
-    displayString("Beep");
+	case 90: // Alarm Triggered
+		blinkFlag = true;
+		displayString("Beep");
 
-  if(blinkON)
-  {
-    pinMode(SETBUTTON, OUTPUT);
-    tone(SETBUTTON,4000) ;
-    delay(100);
-    noTone(SETBUTTON);
-    digitalWrite(SETBUTTON, HIGH);
-  }
+		if(blinkON)
+		{
+			pinMode(SETBUTTON, OUTPUT);
+			tone(SETBUTTON,4000) ;
+			delay(100);
+			noTone(SETBUTTON);
+			digitalWrite(SETBUTTON, HIGH);
+		}
 
-    #if ARDUINO >= 101 
-    pinMode(SETBUTTON, INPUT_PULLUP);
-//    digitalWrite(SETBUTTON, HIGH);
-     #else
-//    digitalWrite(SETBUTTON, HIGH);
-    pinMode(SETBUTTON, INPUT);
-     #endif
-    delay(250);
+#if ARDUINO >= 101 
+		pinMode(SETBUTTON, INPUT_PULLUP);
+#else
+		pinMode(SETBUTTON, INPUT);
+#endif
+		delay(250);
 
-//    bval = !digitalRead(SETBUTTON);
-    if(NextSUBStateRequest || NextStateRequest)
-    {
-      STATE = 0;
-      SUBSTATE = 0;
- //     NextStateFlag = true;
-      NextStateRequest = false;
-      NextSUBStateRequest = false;      
-      blinkFlag = false;
-    }    
-    break;
+		if(NextSUBStateRequest || NextStateRequest)
+		{
+			STATE = 0;
+			SUBSTATE = 0;
+			// NextStateFlag = true;
+			NextStateRequest = false;
+			NextSUBStateRequest = false;      
+			blinkFlag = false;
+		}    
+		break;
 
-    // --------------------------------------------------------------- 
-
-  case 99:                                                                    // Sleep
-    displayString("Nite");
-    delay(500);
-    clearmatrix();
-    GoToSleep();
-    SleepTimer = millis();
-    STATE = 0;
-    SUBSTATE = 0;
-    break;
-
-    // --------------------------------------------------------------- 
-
-  }
+	case 99: // Sleep
+		displayString("Nite");
+		delay(500);
+		clearmatrix();
+		GoToSleep();
+		SleepTimer = millis();
+		STATE = 0;
+		SUBSTATE = 0;
+		break;
+	}
 }
