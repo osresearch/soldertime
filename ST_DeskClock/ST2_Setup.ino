@@ -50,7 +50,7 @@ void setup()
  
 	// Program specific inits
 	//  fillmatrix();
-	//delay(300);
+	delay(300);
 
 	// if the set button is held at startup, run a lamp test
 	if (!digitalRead(SETBUTTON))
