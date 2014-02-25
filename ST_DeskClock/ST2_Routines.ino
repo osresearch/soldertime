@@ -67,11 +67,12 @@ void DisplayTimeSub()
   }
 
   UpdateTime = UpdateTime + 1;
-  if(UpdateTime > 2000)
+  if(UpdateTime > 10000)
   {
     checktime();
     checkDate();
     UpdateTime = 0;
+	LEDMAT[0] ^= 1;
   }
 
 
@@ -96,6 +97,7 @@ void DisplayTimeSub()
       JustWokeUpFlag2 = false;
     }
     delay(250);
+    clearmatrix();
     break;
 
   case 1:              // Time
@@ -143,7 +145,6 @@ void setTimeSub()
   switch (SUBSTATE) 
   {
   case 0:                // Start SET Time
-    clearmatrix();
     displayString("Set?");
     SUBSTATE = 1;
     NextSUBStateRequest = false;
@@ -319,7 +320,6 @@ void setAlarmSub()
   switch (SUBSTATE) 
   {
   case 0:                // Start SET Alarm
-    clearmatrix();
     displayString("ALM?");
     SUBSTATE = 1;
     NextSUBStateRequest = false;
@@ -717,7 +717,7 @@ shortloop:
 
     for(int i = 0;i<=IncomingMessIndex-1;i ++)
     {
-      TEXT = IncomingMessage[i]-32;
+      TEXT = IncomingMessage[i] - ASCII_OFFSET;
       for(int y =0;y<5;y++)
       {    
         Message[MessagePointer] = LETTERS[TEXT][y];
@@ -972,13 +972,9 @@ void graphican()
   }
 }
 
-//*******************************************************************************************************************
-// 								                                        LED tester
-//*******************************************************************************************************************
-
+// LED tester
 void lamptest()
 {
-
   int lamptestspeed = 250;
   clearmatrix();
   bval = !digitalRead(SETBUTTON);
@@ -1050,400 +1046,152 @@ void FILLEEPROM()                                                      // Normal
 }
 
 
-//*******************************************************************************************************************
-// 								                      Output 4 Characters to Display
-//*******************************************************************************************************************
-void displayString(char outText[])
+/*
+ * Output 4 Characters to Display
+ */
+void displayString(const char outText[])
 {
-  int  cindex = 0;
-//  for (int i = 0; i < sizeof(Str1) - 1; i++){
-    for (int i = 0; i < 4; i++){
-    for(int y =0;y<5;y++)
-    { 
-      TEXT = outText[i]-32;   
-      LEDMAT[cindex] = LETTERS[TEXT][y]; 
-      cindex = cindex +1;     
-    }
-  }  
+	for (int i=0 ; i < 4 ; i++)
+		draw_char(5*i+1, outText[i]);
 }
 
-//*******************************************************************************************************************
-// 								                  Output Custom Graphic to Display
-//*******************************************************************************************************************
+
+/*
+ * Output Custom Graphic to Display
+ */
 void displayGraphic(int index, int pos, int len)
 {
-    for(int y =0;y<len;y++)
-    {    
-      LEDMAT[pos] = GRAPHIC[index][y]; 
-      pos = pos +1;    
-    }  
+	for (int y=0 ; y<len ; y++)
+		LEDMAT[pos++] = GRAPHIC[index][y]; 
 }
 
-//*******************************************************************************************************************
-// 								                                   Display Day Text
-//*******************************************************************************************************************
-void displayStringDay(int day)
+
+static void
+draw_small_digit(
+	uint8_t column,
+	unsigned digit,
+	unsigned blinking
+)
 {
-  int  cindex = 0;
-  if(blinkON)
-  {
-    for (int i = 0; i < 3; i++){
-      LEDMAT[cindex] = 0;
-      cindex = cindex +1;
-      for(int y =0;y<5;y++)
-      { 
-        TEXT = days[day][i]-32;   
-        LEDMAT[cindex] = LETTERS[TEXT][y]; 
-        cindex = cindex +1;     
-      }
-    } 
-    LEDMAT[cindex] = 0;
-    LEDMAT[cindex+1] = 0;
-  }
-  else
-  {
-    clearmatrix();
-  }
-}
+	for (unsigned i=0 ; i < 4 ; i++)
+	{
+		LEDMAT[column+i] = blinkON && blinking
+			? 0
+			: LETTERS[digit+digitoffset][i+1]; 
+	}
+}    
 
-//*******************************************************************************************************************
-// 								                                 Display Month Text
-//*******************************************************************************************************************
+
+void
+draw_char(
+	unsigned col,
+	const char c
+)
+{
+	for (int y=0 ; y<5 ; y++)
+		LEDMAT[col++] = LETTERS[c - ASCII_OFFSET][y]; 
+} 
+
+
+/*
+ * Display Month Text.
+ */
 void displayMonth(int code)
 {
-  int  cindex = 0;
-  if(blinkON)
-  {
-    for (int i = 0; i < 3; i++){
-      LEDMAT[cindex] = 0;
-      cindex = cindex +1;
-      for(int y =0;y<5;y++)
-      { 
-        TEXT = months[code][i]-32;   
-        LEDMAT[cindex] = LETTERS[TEXT][y]; 
-        cindex = cindex +1;     
-      }
-    } 
-    LEDMAT[cindex] = 0;
-    LEDMAT[cindex+1] = 0;
-  }
-  else
-  {
-    clearmatrix();
-  }
+	if (!blinkON)
+	{
+		clearmatrix();
+		return;
+	}
+
+	draw_char(2, months[code][0]);
+	draw_char(8, months[code][1]);
+	draw_char(14, months[code][2]);
 }
 
-//*******************************************************************************************************************
-// 								                                       Display Date
-//*******************************************************************************************************************
+
+/*
+ * Display Day Text
+ */
+void displayStringDay(int day)
+{
+	if(!blinkON)
+	{
+		clearmatrix();
+		return;
+	}
+
+	draw_char(2, days[day][0]);
+	draw_char(8, days[day][1]);
+	draw_char(14, days[day][2]);
+}
+
+
+/*
+ * Display Date.
+ */
 void displayDate()
 {
-  int y =0;
-  int i =0;
-  // clearmatrix();
-  if(blinkON)
-  {
-    for( i = 0; i <5; i++)
-    {
-      LEDMAT[i] = 0;
-    }
+	if (!blinkON)
+	{
+		clearmatrix();
+		return;
+	}
 
-    for( i = 5; i <10; i++)
-    {
-      LEDMAT[i] = LETTERS[DateTens+digitoffset][y];
-      y=y+1;
-    }
-
-    y=0;
-
-    for( i = 10; i <15; i++)
-    {
-      LEDMAT[i] = LETTERS[DateOnes+digitoffset][y];
-      y=y+1;
-    }
-
-    for( i = 15; i <20; i++)
-    {
-      LEDMAT[i] = 0;
-    }
-  }
-  else
-  {
-    clearmatrix();
-  }
+	draw_char( 5, DateTens + '0');
+	draw_char(11, DateOnes + '0');
 }
 
-//*******************************************************************************************************************
-// 								                                       Display Year
-//*******************************************************************************************************************
-void displayYear()
-{
-  int y =0;
-  int i =0;
-  // clearmatrix();
-  for( i = 0; i <5; i++)
-  {
-    LEDMAT[i] = LETTERS[DateTens+digitoffset][y];
-    y=y+1;
-  }
-
-  for( i = 5; i <10; i++)
-  {
-    LEDMAT[i] = LETTERS[DateTens+digitoffset][y];
-    y=y+1;
-  }
-
-  y=0;
-
-  for( i = 10; i <15; i++)
-  {
-    LEDMAT[i] = LETTERS[DateOnes+digitoffset][y];
-    y=y+1;
-  }
-
-  for( i = 15; i <20; i++)
-  {
-    LEDMAT[i] = LETTERS[DateTens+digitoffset][y];
-    y=y+1;
-  }
-}
-
-//void fillmatrix()                                                    // Fill Matrix with some text
-//{
-// for(int i =0;i<20;i=i+5)
-//  {  
-//    for(int y =0;y<5;y++)
-//    {      
-//      LEDMAT[i+y] = LETTERS[TEXT][y];      
-//    }
-//    TEXT = TEXT +1;
-//  }
-//}
-
-// ----------
 
 /*
-void scrollleft()                                                    // Shift all dots one space left
+ * Clear LED Matrix
+ */
+void
+clearmatrix()
 {
-  int i= 0;
-  uint8_t temp =0;
-  temp = LEDMAT[0];
-  for(int i =0;i<20;i++)
-  {
-    LEDMAT[i] = LEDMAT[i+1];
-  }
-  LEDMAT[19] = temp;
-}
-*/
-
-/*
-void scrollRight()                                                    // Shift all dots one space left
-{
-  int i= 0;
-  uint8_t temp =0;
-  temp = LEDMAT[19];
-  for(int i =19;i>0;i--)
-  {
-    LEDMAT[i] = LEDMAT[i-1];
-  }
-  LEDMAT[0] = temp;
-}
-*/
-
-//*******************************************************************************************************************
-// 								                                Clear LED Matrix
-//*******************************************************************************************************************
-
-void clearmatrix()
-{
-  for(int i =0;i<20;i++)
-  {
-    LEDMAT[i] = 0;
-  }
+	for (int i=0 ; i<WIDTH ; i++)
+		LEDMAT[i] = 0;
 }
 
 
-//*******************************************************************************************************************
-// 								               Output single character to display
-//*******************************************************************************************************************
 
-void filldigit(int dig, int index)        // Where dig is 1 to 4 and index is position of character 
+/**
+ * Display the four digit time with small characters.
+ *
+ * 
+ * Fills diplay with formated time
+ * Depending on postion of "1"s spacing is adjusted beween it and next digit
+ * Blinks if it settng mode
+ * displays AM/PM dot and Alarm on dot
+ */
+void
+writeTime(
+	uint8_t dig1,
+	uint8_t dig2,
+	uint8_t dig3,
+	uint8_t dig4
+)         
 {
-  for(int y =0;y<5;y++)
-  {      
-    LEDMAT[((dig-1)*5)+y] = LETTERS[index][y];      
-  }    
-}
+	draw_small_digit( 2, dig1, blinkHour);
+	draw_small_digit( 6, dig2, blinkHour);
 
-//*******************************************************************************************************************
-// 								            Fill LED Matrix with formatted time
-//*******************************************************************************************************************
-// Fills diplay with formated time
-// Depending on postion of "1"s spacing is adjusted beween it and next digit
-// Blinks if it settng mode
-// displays AM/PM dot and Alarm on dot
+	// the " : "
+	LEDMAT[10] = B0010100;
 
-void writeTime(uint8_t dig1, uint8_t dig2, uint8_t dig3, uint8_t dig4)         
-{
-  int currentdig = 4;
-  int y = 0;
-  int i = 18;
-  LEDMAT[19] = 0;
-//  LEDMAT[0] = 0;
+	draw_small_digit(12, dig3, blinkMin);
+	draw_small_digit(16, dig4, blinkMin);
+
+	AMPMALARMDOTS = 0;
+
+	// Alarm dot (top left) Do not display while setting alarm
+	if (ALARMON && (STATE == 1))
+		bitSet(AMPMALARMDOTS,6);
   
-  for( y =5;y>1;y--)
-  {      
-    if(blinkON && (blinkMin))
-    {
-      LEDMAT[i] = LETTERS[0][y-2];                            // blank space
-    }
-    else
-    {
-      LEDMAT[i] = LETTERS[dig4+digitoffset][y-2]; 
-    }
-    i = i -1;    
-  }    
-  //  }
-
-  if(dig3 == 1)                                              // Special case of #1, smaller kerning
-  {
-    LEDMAT[i] = 0;
-    if(blinkON && (blinkMin))
-    {
-      LEDMAT[i-1] = 0;                                        // blank space
-    }
-    else
-    {
-      LEDMAT[i-1] = 62; //LETTERS[dig3+digitoffset][3];
-    }
-    LEDMAT[i-2] = 0;
-    i = i -3;
-    currentdig = 2;
-  }
-  else
-  {
-    for( y =5;y>1;y--)
-    {      
-      if(blinkON && (blinkMin))
-      {
-        LEDMAT[i] = LETTERS[0][y-2];                          // blank space
-      }
-      else
-      {
-        LEDMAT[i] = LETTERS[dig3+digitoffset][y-2]; 
-      }
-      i = i -1;    
-    }    
-    currentdig = 2;
-  }
-  // ADD Colon Here - S ---------------------------------
-  if((dig2 == 1) || (dig1 == 3)) 
-  {
-    LEDMAT[i] = 0;
-
-    LEDMAT[i-1] = 20; //LETTERS[26][3];                        // the " : "
-
-    LEDMAT[i-2] = 0;
-    i=i-3;     
-  }
-  else
-  {
-    LEDMAT[i] = 20; //LETTERS[26][3];                          // the " :"
-    LEDMAT[i-1] = 0;
-    i=i-2;    
-  }
-  // ADD Colon Here - E ---------------------------------    
-
-  if(dig2 == 1)                                                // Special case of #1, smaller kerning
-  {
-    LEDMAT[i] = 0;
-    if(blinkON && (blinkHour))
-    {
-      LEDMAT[i-1] = 0;                                         // blank space
-    }
-    else
-    {
-      LEDMAT[i-1] = 62; //LETTERS[dig2+digitoffset][3];
-    }
-    LEDMAT[i-2] = 0;
-    i = i -3;
-    currentdig = 1;
-  }
-  else
-  {
-    for( y =5;y>1;y--)
-    {      
-      if(blinkON && (blinkHour))
-      {
-        LEDMAT[i] = LETTERS[0][y-2];                          // blank space
-      }
-      else
-      {
-        LEDMAT[i] = LETTERS[dig2+digitoffset][y-2]; 
-      }
-      i = i -1;    
-    }    
-    currentdig = 1;
-  }
-
-  if(dig1 == 1)                                              // Special case of #1, smaller kerning
-  {
-    LEDMAT[i] = 0;
-    if(blinkON && (blinkHour))
-    {
-      LEDMAT[i-1] = 0;                                       // blank space
-    }
-    else
-    {
-      LEDMAT[i-1] = 62; // LETTERS[dig1+digitoffset][3];
-    }
-    LEDMAT[i-2] = 0;
-    i = i -2;
-  }
-  else
-  {
-    for( y =5;y>1;y--)
-    {                  
-      if(blinkON && (blinkHour))
-      {
-        LEDMAT[i] = LETTERS[0][y-2];                          // blank space
-      }
-      else
-      {
-        LEDMAT[i] = LETTERS[dig1+digitoffset][y-2]; 
-      }
-      i = i -1;    
-    }    
-   // i = 0;
-  }
+	// AM / PM dot (bottom left) (Display or Set Time)
+	if(PM_NotAM_flag && (STATE == 1 || STATE == 2) && TH_Not24_flag)
+		bitSet(AMPMALARMDOTS,0);
   
-//  for(y= i+1; y>0;y--)                                        // Clear any remaining columns
-    for(y= i+1; y>1;y--)                                        // Clear any remaining columns, but not leftmost
-  {
-    LEDMAT[y-1] = 0;
-  }
-
-//  LEDMAT[0] = 0;
-  AMPMALARMDOTS = 0;
-
-  if(ALARMON && (STATE == 1))                                 // Alarm dot (top left) Do not display while setting alarm
-  {
-//    bitSet(LEDMAT[0],6);
-   bitSet(AMPMALARMDOTS,6);
-  }
-  
-   if(PM_NotAM_flag && (STATE == 1 || STATE == 2) && TH_Not24_flag)     // AM / PM dot (bottom left) (Display or Set Time)
-  {
-//    bitSet(LEDMAT[0],0);
-   bitSet(AMPMALARMDOTS,0);
-  } 
-  
-     if(A_PM_NotAM_flag && (STATE == 3) && TH_Not24_flag)              // AM / PM dot (bottom left) (Set Alarm Time)
-  {
-//    bitSet(LEDMAT[0],0);
-   bitSet(AMPMALARMDOTS,0);
-  } 
-  
-  LEDMAT[0] = AMPMALARMDOTS;
-  
+	// AM / PM dot (bottom left) (Set Alarm Time)
+	if(A_PM_NotAM_flag && (STATE == 3) && TH_Not24_flag)
+		bitSet(AMPMALARMDOTS,0);
 }

@@ -24,6 +24,7 @@ check_sleep_timer(void)
 		} else {
 			STATE= 1; // was STATE= 99; 
 			SUBSTATE = 0;
+			clearmatrix();
 		}
 
 		SleepTimer = millis();
@@ -56,6 +57,7 @@ check_mode_button(void)
 		JustWokeUpFlag2 = true;
 	} else {
 		NextStateRequest = true;
+		clearmatrix();
 	}
 
 	while(1)
@@ -92,6 +94,7 @@ check_set_button(void)
 		return;
 
 	NextSUBStateRequest = true;
+	clearmatrix();
 
 	while(1)
 	{
