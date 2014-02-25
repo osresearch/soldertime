@@ -90,26 +90,33 @@ LEDupdateTHREE()
 
 	if (row_mask != 0)
 	{
+		// Read the pixel data for the current column and output
+		// the one pixel that is currently high.
 		led_output(LEDMAT[column] & row_mask);
 		row_mask >>= 1;
     
-		// Test to see if this makes LEDs brighter
-		//delayMicroseconds(50);
+		// hold the LED on for a fixed period of time
+		// (with interrupts disabled, since this is in
+		// an ISR) and then turn it off.
+		// This is lame, but avoids glitching brightness.
+		delayMicroseconds(30);
+		led_output(0);
 		return;
 	}
+
+	// Turn off before we switch columns and decoders
+	led_output(0);
 
 	// We've displayed the entire row; prep for next column
 	row_mask = 1 << 7;
 	if (++column > 19)
 		column = 0;
 
-
 	// Each matrix has eight columns (from 0 to 7)
 	const unsigned decoder_id = (column / 8) + 1;
 	const unsigned decoder_column = column % 8;
 	
-	// Clear current outputs and disable the decoders while we switch
-	led_output(0);
 	led_decoder_select(decoder_id);
 	led_column_select(decoder_column);
+
 }
