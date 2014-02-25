@@ -9,4 +9,9 @@ well as some other cleanup.
 
 [trmm.net/SolderTime Desk Clock](http://trmm.net/SolderTime_Desk_Clock)
 
+Other changes to be made:
 
+* Move all font and character drawing code into separate routine.
+* Build a state machine that implements the MODE/SET/timeout transitions
+* Fix the timer interrupt to be more consistent; busy loops now to avoid errors
+* Improve startup speed
