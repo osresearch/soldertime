@@ -33,6 +33,13 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 
+/** Overall width of the LED screen */
+#define WIDTH 20
+
+/** Overlal height of the LED screen */
+#define HEIGHT 8
+
+
 // Worm animation
 int c =0;
 int y = 3;
@@ -197,5 +204,9 @@ const int digitoffset = 95;                // 95             // was 16
 #define         RTC_ALARM1DATE  B00001010               //; Date
 
 // Fonts have been moved to font.c
+
+/// Font offset
+#define ASCII_OFFSET 0x20
+
 extern const uint8_t LETTERS[][5];
 extern const uint8_t GRAPHIC[][5];
