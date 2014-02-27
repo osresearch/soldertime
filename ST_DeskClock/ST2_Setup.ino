@@ -53,7 +53,7 @@ void setup()
  
 	// Program specific inits
 	//  fillmatrix();
-	delay(400);
+	delay(300);
 
 	// if the set button is held at startup, run a lamp test
 	if (!digitalRead(SETBUTTON))
@@ -61,8 +61,19 @@ void setup()
 		lamptest();
 	}
   
-	displayString("v1.1");
-	delay(1500);
+	// transpose the image data into the frame buffer
+	for (int row = 0 ; row < 7 ; row++)
+	{
+		for (int col = 0 ; col < 20 ; col++)
+		{
+			//led_draw(col, row, col * 16 + row * 32);
+			led_draw(col, row, logo[row][col]);
+		}
+	}
+	delay(1000);
+
+	displayString("v1.2");
+	delay(500);
 	clearmatrix();
   
 	SetAlarmTime(); // for testing
