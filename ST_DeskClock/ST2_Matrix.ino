@@ -139,11 +139,18 @@ LEDupdateTHREE()
 		// (with interrupts disabled, since this is in
 		// an ISR) and then turn it off.
 		// This is lame, but avoids glitching brightness.
-		bright /= 8;
-		//delayMicroseconds(bright);
-		delayMicroseconds(30);
+		for (uint8_t i = 0; i < bright ; i++)
+		{
+			__asm__ __volatile__("nop");
+			__asm__ __volatile__("nop");
+		}
 		led_output(0);
-		//delayMicroseconds(31-bright);
+		for (uint8_t i = bright; i != 0 ; i++)
+		{
+			__asm__ __volatile__("nop");
+			__asm__ __volatile__("nop");
+		}
+
 		return;
 	}
 

@@ -1180,11 +1180,13 @@ writeTime(
 	draw_small_digit( 2, dig1, blinkHour);
 	draw_small_digit( 6, dig2, blinkHour);
 
-	// the " : "
-	static uint8_t bright = 0;
-	led_draw(10, 2, bright);
-	led_draw(10, 4, bright);
-	bright++;
+	// the slowly flashing " : "
+	static uint16_t bright = 0;
+	uint8_t b = bright++ / 8;
+	if (b >= 128)
+		b = 0xFF - b;
+	led_draw(10, 2, 2*b);
+	led_draw(10, 4, 2*b);
 
 	draw_small_digit(12, dig3, blinkMin);
 	draw_small_digit(16, dig4, blinkMin);
