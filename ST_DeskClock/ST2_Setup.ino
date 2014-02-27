@@ -37,7 +37,8 @@ void setup()
 	// Turn one Interupts, used to update the displayed LED matrix
 	// the ISR holds a single LED on for some number of microseconds;
 	// this timeout value must be higher than that (by a few microseconds at least)
-	Timer1.initialize(40); // was 100
+	// Lower numbers == less flicker
+	Timer1.initialize(30); // was 100
 	Timer1.attachInterrupt(LEDupdateTHREE); 
 
 	// I2C Inits
