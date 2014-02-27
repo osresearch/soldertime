@@ -72,7 +72,6 @@ void DisplayTimeSub()
     checktime();
     checkDate();
     UpdateTime = 0;
-	LEDMAT[0] ^= 1;
   }
 
 
@@ -760,7 +759,11 @@ shortloop:
       IncomingIndex = StartWindow;
       for(int i=0;i<20;i++)
       {
-        LEDMAT[i] = Message[IncomingIndex];
+	for (int bit = 0, mask = 1 ; bit < 7 ; bit++, mask <<= 1)
+	{
+		uint8_t bright = Message[IncomingIndex] & mask;
+		led_draw(i, bit, bright ? 0xFF : 0);
+	}
         IncomingIndex = IncomingIndex + 1;
         if(IncomingIndex>IncomingMax)
         {
@@ -932,14 +935,14 @@ void graphican()
 
 
       // --         
-      LEDMAT[c] = temp;
+      led_draw_col(c, temp, 0xFF);
       if((c-wormlenght)<0)
       {
-        LEDMAT[19-((wormlenght-1)-c)] = 0;
+        led_draw_col(19-((wormlenght-1)-c), 0, 0);
       }
       else
       {
-        LEDMAT[c-wormlenght] = 0;
+        led_draw_col(c-wormlenght, 0, 0);
       }
       scrollCounter = 0;
     }
@@ -987,7 +990,7 @@ void lamptest()
       {
         for(int y = 0; y<8;y++)
         {
-          bitSet(LEDMAT[i],y);
+	  led_draw(i, y, 0xFF);
           delay(lamptestspeed / 10);
           bval = !digitalRead(SETBUTTON);
           if(bval)
@@ -1007,7 +1010,7 @@ void lamptest()
         }
 
         delay(lamptestspeed);
-        LEDMAT[i] = 0;
+	led_draw_col(i, 0, 0);
         delay(lamptestspeed / 5);
       }
       bval = !digitalRead(MODEBUTTON);
@@ -1062,7 +1065,7 @@ void displayString(const char outText[])
 void displayGraphic(int index, int pos, int len)
 {
 	for (int y=0 ; y<len ; y++)
-		LEDMAT[pos++] = GRAPHIC[index][y]; 
+		led_draw_col(pos++, GRAPHIC[index][y], 0xFF); 
 }
 
 
@@ -1075,9 +1078,11 @@ draw_small_digit(
 {
 	for (unsigned i=0 ; i < 4 ; i++)
 	{
-		LEDMAT[column+i] = blinkON && blinking
-			? 0
-			: LETTERS[digit+digitoffset][i+1]; 
+		led_draw_col(
+			column+i,
+			LETTERS[digit+digitoffset][i+1],
+			blinkON && blinking ? 0 : 0xFF
+		);
 	}
 }    
 
@@ -1089,7 +1094,7 @@ draw_char(
 )
 {
 	for (int y=0 ; y<5 ; y++)
-		LEDMAT[col++] = LETTERS[c - ASCII_OFFSET][y]; 
+		led_draw_col(col++, LETTERS[c - ASCII_OFFSET][y], 0xFF); 
 } 
 
 
@@ -1150,7 +1155,7 @@ void
 clearmatrix()
 {
 	for (int i=0 ; i<WIDTH ; i++)
-		LEDMAT[i] = 0;
+		led_draw_col(i, 0, 0);
 }
 
 
@@ -1176,7 +1181,10 @@ writeTime(
 	draw_small_digit( 6, dig2, blinkHour);
 
 	// the " : "
-	LEDMAT[10] = B0010100;
+	static uint8_t bright = 0;
+	led_draw(10, 2, bright);
+	led_draw(10, 4, bright);
+	bright++;
 
 	draw_small_digit(12, dig3, blinkMin);
 	draw_small_digit(16, dig4, blinkMin);

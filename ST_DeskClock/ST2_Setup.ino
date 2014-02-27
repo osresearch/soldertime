@@ -37,7 +37,7 @@ void setup()
 	// Turn one Interupts, used to update the displayed LED matrix
 	// the ISR holds a single LED on for some number of microseconds;
 	// this timeout value must be higher than that (by a few microseconds at least)
-	Timer1.initialize(50); // was 100
+	Timer1.initialize(60); // was 100
 	Timer1.attachInterrupt(LEDupdateTHREE); 
 
 	// I2C Inits
@@ -52,7 +52,7 @@ void setup()
  
 	// Program specific inits
 	//  fillmatrix();
-	delay(300);
+	delay(400);
 
 	// if the set button is held at startup, run a lamp test
 	if (!digitalRead(SETBUTTON))

@@ -5,6 +5,36 @@
  *
  */
 
+
+// Store a padded version of the array to avoid multiplies
+static volatile uint8_t led_matrix[WIDTH][8];
+
+void
+led_draw(
+	uint8_t col,
+	uint8_t row,
+	uint8_t bright
+)
+{
+	led_matrix[col][row] = bright;
+}
+
+
+void
+led_draw_col(
+	uint8_t col,
+	uint8_t bits,
+	uint8_t bright
+)
+{
+	for (uint8_t row=0, mask=1; row < 7 ; row++, mask <<=1)
+	{
+		uint8_t bit = bits & mask;
+		led_draw(col, row, bit ? bright : 0);
+	}
+}
+
+
 /** Select a decoder.
  * 0 == none, otherwise  1 through 3
  *
@@ -86,21 +116,34 @@ void
 LEDupdateTHREE()
 {  
 	static uint8_t row_mask = 0;
+	static uint8_t row = 0;
 	static uint8_t column = 0;
 
 	if (row_mask != 0)
 	{
 		// Read the pixel data for the current column and output
 		// the one pixel that is currently high.
-		led_output(LEDMAT[column] & row_mask);
 		row_mask >>= 1;
+		uint8_t bright = led_matrix[column][--row];
+#define reverse_video 0
+		if (reverse_video)
+			bright = 0xFF - bright;
+
+		if (bright)
+			led_output(row_mask);
+		else
+			led_output(0);
+
     
-		// hold the LED on for a fixed period of time
+		// hold the LED on for a scaled period of time
 		// (with interrupts disabled, since this is in
 		// an ISR) and then turn it off.
 		// This is lame, but avoids glitching brightness.
+		bright /= 8;
+		//delayMicroseconds(bright);
 		delayMicroseconds(30);
 		led_output(0);
+		//delayMicroseconds(31-bright);
 		return;
 	}
 
@@ -108,7 +151,9 @@ LEDupdateTHREE()
 	led_output(0);
 
 	// We've displayed the entire row; prep for next column
-	row_mask = 1 << 7;
+	row_mask = 0x80;
+	row = 7;
+
 	if (++column > 19)
 		column = 0;
 

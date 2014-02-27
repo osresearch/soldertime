@@ -169,12 +169,6 @@ boolean ALARMON = false;
 boolean scrollDirFlag = false;
 
 
-//
-volatile uint8_t Mcolumn = 0;
-//volatile uint8_t McolumnTemp = 0;
-//volatile uint8_t Mrow = 0;
-volatile uint8_t LEDMAT[20];
-
 volatile boolean MINUP = false;
 volatile boolean MINDOWN = false;
 volatile boolean TFH = false;
